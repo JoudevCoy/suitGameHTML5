@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  
+  <link rel="stylesheet" href="fontawesome.min.css">
+  <title> Membuat Game, batu gunting kertas </title>
+</head>
+<body>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: arial, sans-serif; user-select: none; }
+    
+    body {
+      width: 100%;
+      max-height: 100vh;
+      height: 100vh;
+      background: #efefef;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .game {
+      width: 400px;
+      height: 570px;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 13px 13px 20px 3px #00000020;
+      overflow: hidden;
+      text-align: center;
+      padding: 20px 15px;
+    }
+    .game .title {
+      color: #25391f;
+      font-size: 26px;
+    }
+    .game .output {
+      width: 100%;
+      height: 50%;
+      background: #fafafa;
+      border-radius: 15px;
+    }
+    .output p {
+      color: #486a3e;
+      font-size: 17px;
+      padding-top: 20px;
+    }
+    .output-img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+    }
+    .input {
+      display: flex;
+      width: 100%;
+      height: 50%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .input div {
+      width: 30%;
+      height: 120px;
+      padding: 5px;
+      border: 1px solid #444;
+      background: #fff;
+      transform: scale(1);
+      border-radius: 14px;
+      box-shadow: 0px 0px 8px 1px #00000032;
+    }
+    .nonactive {
+      pointer-events: none;
+    }
+    .input div:active {
+      background: #eee;
+      transform: scale(0.96);
+      box-shadow: 0px 0px 3px 0.4px #00000032;
+    }
+    .input div img {
+      width: 70px;
+      height: 70px;
+    }
+    .input div p {
+      text-align: center;
+      color: #486a3e;
+    }
+    
+    .notifikasi {
+      width: 0;
+      height: 100vh;
+      pointer-events: none;
+      position: fixed;
+      background: #00000050;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+    }
+    .notifikasi h1 {
+      color: #fff;
+      font-size: 35px;
+    }
+    
+    /* UI */
+    .ui {
+      top: 0;
+      left: 0;
+      position: fixed;
+      width: 100%;
+      height: auto;
+      text-align: center;
+    }
+    .ui .myPoint {
+      text-align: center;
+      font-size: 35px;
+      color: #52963e;
+      font-weight: 500;
+      margin-top: 20px;
+    }
+    
+    /** Loading **/
+    .loading-wrap {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: linear-gradient(0deg, #00000050 0%, #000000 90%);
+      display: flex;
+      justify-content: center;
+      padding-top: 20px;
+    }
+    .loading-wrap .loading {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border-top: 8px solid #fff;
+      border-left: 8px solid #444;
+      border-right: 8px solid #444;
+      border-bottom: 8px solid #444;
+      transform: rotate(0deg);
+      display: block;
+      animation: spin 1s cubic-bezier(0.3,0.5,0.5,0) infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  
+  <div class="ui">
+    <span class="myPoint"> Point 0 </span>
+  </div>
+  
+  <div class="game">
+    <h1 class="title"> Permainan Batu Gunting Kertas </h1>
+    <div class="output">
+      <p> Computer </p>
+      <img src="assets/l.png" class="output-img">
+      <h1 class="output-text"> ??? </h1>
+    </div>
+    <div class="input">
+      <div onclick="suit(0);">
+        <img src="assets/batu.png">
+        <p> Batu </p>
+      </div>
+      <div onclick="suit(1);">
+        <img src="assets/gunting.png">
+        <p> Gunting </p>
+      </div>
+      <div onclick="suit(2);">
+        <img src="assets/kertas.png">
+        <p> Kertas </p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="notifikasi">
+    <h1 class="fa-bounce"> Notifikasi </h1>
+  </div>
+  <div class="loading-wrap">
+    <div class="loading"></div>
+  </div>
+  
+  <script>
+    
+    window.addEventListener("load", function(){
+      document.querySelector(".loading-wrap").style.display = "none";
+    });
+  
+    const outputImg = document.querySelector(".output-img"),
+      outputText = document.querySelector(".output-text"),
+      pointText = document.querySelector(".ui .myPoint"),
+      input = document.querySelector(".input");
+      
+    
+    var point = 0;
+    var cChoice;
+    var pChoice;
+    
+    input.addEventListener("click", () => {
+      input.classList.add("nonactive");
+      setTimeout(() => {
+        input.classList.remove("nonactive");
+      }, 1300);
+    });
+    
+    function suit(input){
+      cChoice = Math.floor(Math.random() * 3);
+      pChoice = input;
+      
+      setImg();
+      setTimeout(() => {
+        result();
+      }, 800);
+    }
+    
+    function setImg(){
+      switch(cChoice){
+        case 0:
+          outputImg.src = "assets/batu.png";
+          outputText.innerText = "Batu";
+          break;
+        case 1:
+          outputImg.src = "assets/gunting.png";
+          outputText.innerText = "Gunting";
+          break;
+        case 2:
+          outputImg.src = "assets/kertas.png"
+          outputText.innerText = "Kertas";
+      }
+    }
+    function result(){      
+      if (cChoice == pChoice){
+        showNotification(" Seri! ", 600);
+        restart();
+      }
+      switch(pChoice){
+        case 0:
+          if (cChoice == 1){
+            showNotification(" Kamu Menang! ", 600);
+            point++;
+          } else if (cChoice == 2){
+            showNotification(" Kamu Kalah! ", 600);
+          }
+          restart();
+          break;
+        case 1:
+          if (cChoice == 2){
+            showNotification(" Kamu Menang! ", 600);
+            point++;
+          } else if (cChoice == 0){
+            showNotification(" Kamu Kalah! ", 600);
+          }
+          restart();
+          break;
+        case 2:
+          if (cChoice == 0){
+            showNotification(" Kamu Menang! ", 600);
+            point++;
+          } else if (cChoice == 1){
+            showNotification(" Kamu Kalah! ", 600);
+          }
+          restart();
+          break;
+      }
+      pointText.innerText = "Point " + point;
+    }
+    
+    function restart(){
+      outputImg.src = "assets/l.png";
+      outputText.innerText = "???";
+      cChoice = null;
+      pChoice = null;
+    }
+    
+    function showNotification(text, length){
+      const notification = document.querySelector(".notifikasi"),
+        notificationText = document.querySelector(".notifikasi h1");
+      notification.style.width = "100%";
+      notification.style.opacity = 1;
+      notificationText.innerText = text;
+      setTimeout(() => {
+        notification.style.width = 0;
+        notification.style.opacity = 0;
+      }, length);
+    }
+  </script>
+</body>
+</html>
